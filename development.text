@@ -20,7 +20,7 @@ idade int,
 email varchar(100)
 );
 
-insert into tb_funcionarios values(0,'Alysson Luigi Santos',26540.25,'2018-02-07','M',null);
+insert into tb_funcionarios values(0,'Alice Aparecida Santana',26540.25,'2018-02-07','M',null);
 
 select * from tb_funcionarios;
 
