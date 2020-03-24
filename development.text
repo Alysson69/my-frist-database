@@ -1,4 +1,3 @@
--- my-frist-database
 create database banco;
 
 use banco;
@@ -20,14 +19,14 @@ idade int,
 email varchar(100)
 );
 
-insert into tb_funcionarios values(0,'Alice Aparecida Santana',26540.25,'2018-02-07','M',null);
+insert into tb_funcionarios values(0,'Alysson Luigi Santos',26540.25,'2018-02-07','M',null);
 
 select * from tb_funcionarios;
 
 update tb_funcionarios
 SET salario = salario * 1.1;
 
-delete from tb_pessoas;
+delete from tb_clientes;
 drop table tb_funcionarios;
 
 /*tabela tb_pessoas criando tabela pelo mouse*/
@@ -53,8 +52,9 @@ select * from tb_funcionarios;
 insert into tb_funcionarios
 select id, nome, 950, current_date(),sexo, null from tb_pessoas;
 
--- selecão especifica
+select * from tb_funcionarios;
 
+-- selecão especifica
 use banco;
 
 select nome , salario as atual,
@@ -75,14 +75,14 @@ select * from tb_funcionarios where sexo <> 'm' or salario > 1300;
 update tb_funcionarios set salario = salario * 1.4 where nome = 'carla';
 
 -- like between soundex
-
 select * from tb_funcionarios where nome like '%a%';
 
 select * from tb_funcionarios where nome like 'a%';
 
 select * from tb_funcionarios where nome like '%a';
 
-select * from tb_funcionarios where nome like '__a%';
+select * from tb_funcionarios where nome like '__a%'; /*cada _ uma letra!*/
+
 
 select * from tb_funcionarios where nome like 'a%';
 
@@ -94,24 +94,28 @@ select * from tb_funcionarios where salario	between 1400 and 2000;
 -- compara os sons porem a primeira letra tem que ser fixa
 select * from tb_funcionarios where soundex(nome) = soundex('alison');
 
+-- diferentes tipos de datas
 select * from tb_funcionarios where cadastro > '2016-01-10';
-select * from tb_funcionarios where cadastro > '2016.01.10';
-select * from tb_funcionarios where cadastro > '2016/01/10';
-select * from tb_funcionarios where cadastro > '20160110';
+select * from tb_funcionarios where admissao != '2016.01.10';
+select * from tb_funcionarios where cadastro < '2016/01/10';
+select * from tb_funcionarios where admissao = '20160110';
 
-update tb_funcionarios set admissao = current_date() where id = 5;
+update tb_funcionarios set admissao = '2016/01/10' where id = 5;
+
+select * from tb_funcionarios;
 
 -- interessante para parcelas ou prazos
 update tb_funcionarios set admissao = date_add(current_date(), interval 30 day) where id = 2;
+select * from tb_funcionarios;
 
 -- interessante para garantias ou contratos pré determinados
 select datediff(admissao, current_date()) as 'diferença de dias' from tb_funcionarios where id = 1;
 
-select * from tb_funcionarios where month (admissao) = 2;
+select * from tb_funcionarios where month (admissao) = 3;
 
-select * from tb_funcionarios where day (admissao) = 8;
+select * from tb_funcionarios where day (admissao) = 10;
 
-select * from tb_funcionarios where month (admissao) = 2 and year (admissao) = 2020;
+select * from tb_funcionarios where month (admissao) = 4 and year (admissao) = 2020;
 
 -- organizando o select da tabela
 select * from tb_funcionarios order by 2;
@@ -119,19 +123,23 @@ select * from tb_funcionarios order by nome; -- equivalente ao anterior
 
 select * from tb_funcionarios order by salario;
 
-select * from tb_funcionarios order by salario desc;
+select * from tb_funcionarios order by salario desc; /-- decrescente
 
-select * from tb_funcionarios order by salario desc, nome asc;
+select * from tb_funcionarios order by salario desc, nome asc; -- nome depois
 
 select * from tb_funcionarios order by salario limit 0 , 3; -- (0,3) 0 = onde inicia, 3 = quantos apos o inicio
 
 select * from tb_funcionarios where year(admissao) = 2020 and day(admissao) > 8 order by salario limit 0 , 3;
 
+select * from tb_funcionarios;
+
 -- update de varias colunas !!!!! where nunca vai virgula somente and/or !!!!!!
-update tb_funcionarios set salario = 4000, admissao = '2020-02-10' where salario > 3000 and sexo = 'm';
+update tb_funcionarios set salario = 4000, admissao = '2020-02-10' where salario > 1000 and sexo = 'f';
 
 -- comando delete
 delete from tb_funcionarios where id = 1;
+
+select * from tb_funcionarios;
 
 -- uma forma de confirmação da ação
 start transaction;
@@ -143,11 +151,112 @@ select * from tb_pessoas;
 rollback;
 -- confirma a ação
 commit;
+/*
+create table tb_funcionarios(
+id int,
+nome varchar(50),
+salario decimal(10,2),
+admissao date,
+sexo enum('F','M'),
+cadastro timestamp default current_timestamp()
+);
+*/
 -- continuara apartir do ultimo
 insert into tb_pessoas values(null , 'josé', 'm');
 select * from tb_pessoas;
 -- reseta a tabela
 truncate table tb_pessoas;
+-- tipos de interações:
+-- um para um, um para muitos, muitos para muitos
+drop table tb_funcionarios;
+drop table tb_pessoas;
+-- padroẽs 
+create table tb_pessoas(
+	idpessoa int auto_increment not null, -- not null = campo obrigatorio
+    desnome varchar(256) not null, -- DESnome DES=descrição  tipo var ou varchar 
+	dtcadastro timestamp not null default current_timestamp (), -- dt = data
+	constraint PK_pessoas primary key (idpessoa)
+) engine = InnoDB; -- engine(qual tipo de armazenamento sera usado)'acesso rapido, processamento, etc...'
 
+create table tb_funcionarios (
+idfuncionario int auto_increment not null,
+idpessoa int not null,
+vlsalario decimal(10,2) not null default 1000.00 ,
+dtadmissao date not null,
+constraint PK_funcionarios primary key (idfuncionario),
+constraint fk_funcionarios_pessoas foreign key (idpessoa) -- tabelade de onde estou _ tabela de onde vem as informações (freign key= quem é a chave estrangeira) 
+	references tb_pessoas (idpessoa)  -- referenciando tabela tb_pessoas se existe a coluna (integridade referencial)
+); 
 
-drop database banco;
+insert into tb_pessoas values(null, 'joao', null);
+select * from tb_pessoas;
+
+insert into tb_funcionarios values(null, 1 , 5000, current_date());
+select * from tb_funcionarios;
+insert into tb_funcionarios values(null, 2 , 5000, current_date()); -- erro pois o FK referenciado nao existe
+
+select * from tb_funcionarios a inner join tb_pessoas b -- inner join = juntos com
+	on a.idpessoa = b.idpessoa; -- on = onde
+
+select * from tb_funcionarios a inner join tb_pessoas b
+	using (idpessoa);
+    
+    insert into tb_pessoas values(null , 'maria', null);
+    
+select * from tb_pessoas a left join tb_funcionarios b -- left join = todos da esquerda e os da direita q tenha a coluna idpessoa
+	on a.idpessoa = b.idpessoa;
+
+select * from tb_pessoas a right join tb_funcionarios b
+	on a.idpessoa = b.idpessoa;
+    
+    -- subquerys    
+insert into tb_pessoas values(null, 'jose', null);
+
+select * from tb_pessoas where desnome like 'j%';
+
+delete from tb_pessoas where idpessoa in (select idpessoa from tb_clientes
+ where desnome NOT like "j%");
+
+select * from tb_pessoas;
+
+-- group by
+create table tb_pedidos (
+idpedido int auto_increment not null,
+idpessoa int not null,
+dtpedido datetime not null,
+vlrpedido dec(20,2),
+constraint PK_pedidos primary key (idpedido),
+constraint FK_pedidos_pessoas foreign key(idpessoa) references tb_pessoas (idpessoa)
+);
+
+-- inserindo pedidos
+insert into tb_pedidos values(null, 1, current_date(), 5463.68);
+insert into tb_pedidos values(null, 1, current_date(), 63.64);
+insert into tb_pedidos values(null, 1, current_date(), 548.64);
+insert into tb_pedidos values(null, 1, current_date(), 546003.64);
+
+insert into tb_pedidos values(null, 2, current_date(), 5863.68);
+insert into tb_pedidos values(null, 2, current_date(), 6378.60);	
+insert into tb_pedidos values(null, 2, current_date(), 48.64);
+insert into tb_pedidos values(null, 2, current_date(), 5003.97);
+insert into tb_pedidos values(null, 2, current_date(), 5453.93);
+
+insert into tb_pedidos values(null, 3, current_date(), 5564663.97);
+
+-- consultando pedidos
+select * from tb_pedidos;
+
+select * from tb_pedidos a inner join tb_pessoas b using (idpessoa);
+
+select b.desnome, a.vlrpedido from tb_pedidos a inner join tb_pessoas b using(idpessoa);
+
+-- consulta mais detalhada
+select b.desnome,
+sum(a.vlrpedido) as valor_total,
+convert(avg(a.vlrpedido), dec(10,2)) as valor_medio,
+convert(min(a.vlrpedido), dec(10,2)) as valor_menor,
+convert(max(a.vlrpedido), dec(10,2)) as valor_maior,
+count(*) as total_de_pedidos
+from tb_pedidos a inner join tb_pessoas b using(idpessoa)group by b.idpessoa order by desnome;
+
+continua...
